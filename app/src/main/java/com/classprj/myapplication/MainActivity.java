@@ -19,15 +19,15 @@ public class MainActivity extends AppCompatActivity {
 
         GridView gridView = findViewById(R.id.gridview);
         BookAdapter adapter = new BookAdapter();
-        adapter.addItem(new Book("a","01032312343", R.drawable.a1));
-        adapter.addItem(new Book("b","01073842933", R.drawable.a1));
-        adapter.addItem(new Book("c","01034495948", R.drawable.a1));
-        adapter.addItem(new Book("d","01054894595", R.drawable.a1));
-        adapter.addItem(new Book("e","01032312343", R.drawable.a1));
-        adapter.addItem(new Book("f","01032312343", R.drawable.a1));
-        adapter.addItem(new Book("g","018239585", R.drawable.a1));
-        adapter.addItem(new Book("h","01092838575", R.drawable.a1));
-        adapter.addItem(new Book("i","01072453443", R.drawable.a1));
+        adapter.addItem(new Book("a","322/500", R.drawable.a1));
+        adapter.addItem(new Book("b","322/500", R.drawable.a1));
+        adapter.addItem(new Book("c","322/500", R.drawable.a1));
+        adapter.addItem(new Book("d","322/500", R.drawable.a1));
+        adapter.addItem(new Book("e","322/500", R.drawable.a1));
+        adapter.addItem(new Book("f","322/500", R.drawable.a1));
+        adapter.addItem(new Book("g","322/500", R.drawable.a1));
+        adapter.addItem(new Book("h","322/500", R.drawable.a1));
+        adapter.addItem(new Book("i","322/500", R.drawable.a1));
         gridView.setAdapter(adapter);
 
     }

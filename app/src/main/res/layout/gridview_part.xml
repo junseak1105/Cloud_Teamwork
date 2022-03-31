@@ -16,7 +16,7 @@
 
         <ImageView
             android:id="@+id/book_image"
-            android:layout_width="match_parent"
+            android:layout_width="766dp"
             android:layout_height="match_parent"
             android:layout_weight="80"
             android:background="#FFD9FA" />
