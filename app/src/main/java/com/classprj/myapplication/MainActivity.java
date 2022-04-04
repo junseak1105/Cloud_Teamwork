@@ -2,10 +2,12 @@ package com.classprj.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 
 import java.util.ArrayList;
@@ -16,6 +18,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //로그인 버튼 시작
+        Button SigninButton = (Button) findViewById(R.id.button_login);
+        SigninButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+        //로그인 버튼 끝
 
         GridView gridView = findViewById(R.id.gridview);
         BookAdapter adapter = new BookAdapter();
@@ -29,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
         adapter.addItem(new Book("h","322/500", R.drawable.a1));
         adapter.addItem(new Book("i","322/500", R.drawable.a1));
         gridView.setAdapter(adapter);
+
+
+
 
     }
     public class BookAdapter extends BaseAdapter{
