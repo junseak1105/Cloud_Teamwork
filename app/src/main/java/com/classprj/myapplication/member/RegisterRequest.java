@@ -1,4 +1,4 @@
-package com.classprj.myapplication;
+package com.classprj.myapplication.member;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
