@@ -73,7 +73,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                // EditText에 현재 입력되어있는 값을 get(가져온다)해온다.
+                // EditText에 현재 입력되어있는 값을 get
                 String userID = et_id.getText().toString();
                 String userPass = et_pass.getText().toString();
                 String userPass_chk = et_pass_chk.getText().toString();
@@ -84,11 +84,11 @@ public class RegisterActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            System.out.println("yes");
                             JSONObject jsonObject = new JSONObject(response);
                             boolean success = jsonObject.getBoolean("success");
                             String returnMsg = jsonObject.getString("returnMsg");
-                            System.out.println(returnMsg);
+
+                            //아이디, 이메일 중복체크 후 회원등록 진행
                             if(returnMsg.equals("ID_already_exists")) {
                                 Toast.makeText(getApplicationContext(),"이미 존재하는 아이디입니다.",Toast.LENGTH_SHORT).show();
                             }else if(returnMsg.equals("Email_already_exists")){
@@ -107,6 +107,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                     }
                 };
+
                 //회원가입 폼 검사
                 if (!userPass.equals(userPass_chk)){
                     Toast.makeText(getApplicationContext(),"작성한 비밀번호가 일치하지 않습니다.",Toast.LENGTH_SHORT).show();
