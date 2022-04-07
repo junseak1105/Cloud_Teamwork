@@ -61,6 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         // };
 
 
+
         et_id = findViewById(R.id.et_id); //아이디
         et_pass = findViewById(R.id.et_pass);//패스워드
         btn_login = findViewById(R.id.btn_login);//로그인 버튼

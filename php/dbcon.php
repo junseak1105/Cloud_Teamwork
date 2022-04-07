@@ -31,7 +31,7 @@ $conn = mysqli_connect(
 //     '',
 //     'dgnr'
 // );
-// 한글깨짐 현상 관련
+
 mysqli_query($conn, "set session character_set_connection=utf8;");
 mysqli_query($conn, "set session character_set_results=utf8;");
 mysqli_query($conn, "set session character_set_client=utf8;");
