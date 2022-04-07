@@ -8,12 +8,12 @@
     $userID = $_POST["userID"];
     $userPassword = $_POST["userPassword"];
 
-    $statement = mysqli_prepare($con, "SELECT userID,userPassword FROM member WHERE userID = ? AND userPassword = ?");
+    $statement = mysqli_prepare($con, "SELECT userID,userPassword,token FROM member WHERE userID = ? AND userPassword = ?");
     mysqli_stmt_bind_param($statement, "ss", $userID, $userPassword);
     mysqli_stmt_execute($statement);
 
     mysqli_stmt_store_result($statement);
-    mysqli_stmt_bind_result($statement, $userID, $userPassword);
+    mysqli_stmt_bind_result($statement, $userID, $userPassword,$token);
 
     $response = array();
     $response["success"] = false;
