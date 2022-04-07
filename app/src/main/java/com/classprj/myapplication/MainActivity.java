@@ -3,12 +3,14 @@ package com.classprj.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -19,6 +21,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //로그인 토큰 체크
+        SharedPreferences pref = getSharedPreferences("login_session",MODE_PRIVATE);
+        if(!pref.getString("token","").equals("")) {
+            String token = pref.getString("token", "");
+            Toast.makeText(getApplicationContext(), token, Toast.LENGTH_SHORT).show();
+        };
         //로그인 버튼 시작
         Button SigninButton = (Button) findViewById(R.id.button_login);
         SigninButton.setOnClickListener(new View.OnClickListener(){
