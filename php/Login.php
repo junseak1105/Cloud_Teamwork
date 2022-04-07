@@ -22,6 +22,7 @@
         $response["success"] = true;
         $response["userID"] = $userID;
         $response["userPassword"] = $userPassword;
+        $response["token"] = $token;
     }
 
     echo json_encode($response);

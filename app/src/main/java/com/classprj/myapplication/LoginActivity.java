@@ -29,36 +29,36 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        //세션 체크
-        SharedPreferences sf = getSharedPreferences("login_session",MODE_PRIVATE);
-        if(sf.getString("YN","").equals("yes")){
-            String userID = sf.getString("ID","");
-            String userPass = sf.getString("PW","");
-            Response.Listener<String> responseListener_autologin = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);
-                        boolean success = jsonObject.getBoolean("success");
-                        if (success) { // 로그인에 성공한 경우
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            intent.putExtra("userID", userID);
-                            intent.putExtra("userPass", userPass);
-                            startActivity(intent);
-                        } else { // 로그인에 실패한 경우
-                            Toast.makeText(getApplicationContext(),"자동로그인에 실패하였습니다.",Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            login_chk login_chk = new login_chk(userID, userPass, responseListener_autologin);
-            RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
-            queue.add(login_chk);
-        };
+        SharedPreferences pref = getSharedPreferences("login_session",MODE_PRIVATE);
+        // //세션 체크
+        // SharedPreferences sf = getSharedPreferences("login_session",MODE_PRIVATE);
+        // if(sf.getString("YN","").equals("yes")){
+        //     String userID = sf.getString("ID","");
+        //     String userPass = sf.getString("PW","");
+        //     Response.Listener<String> responseListener_autologin = new Response.Listener<String>() {
+        //         @Override
+        //         public void onResponse(String response) {
+        //             try {
+        //                 JSONObject jsonObject = new JSONObject(response);
+        //                 boolean success = jsonObject.getBoolean("success");
+        //                 if (success) { // 로그인에 성공한 경우
+        //                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        //                     intent.putExtra("userID", userID);
+        //                     intent.putExtra("userPass", userPass);
+        //                     startActivity(intent);
+        //                 } else { // 로그인에 실패한 경우
+        //                     Toast.makeText(getApplicationContext(),"자동로그인에 실패하였습니다.",Toast.LENGTH_SHORT).show();
+        //                     return;
+        //                 }
+        //             } catch (JSONException e) {
+        //                 e.printStackTrace();
+        //             }
+        //         }
+        //     };
+        //     login_chk login_chk = new login_chk(userID, userPass, responseListener_autologin);
+        //     RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
+        //     queue.add(login_chk);
+        // };
 
 
         et_id = findViewById(R.id.et_id); //아이디
@@ -101,18 +101,15 @@ public class LoginActivity extends AppCompatActivity {
                             if (success) { // 로그인에 성공한 경우
                                 String userID = jsonObject.getString("userID");
                                 String userPass = jsonObject.getString("userPassword");
+                                String token = jsonObject.getString("token");
                                 //자동로그인 체크시 수행
                                 if(cb_autologin.isChecked()){
-                                    SharedPreferences pref = getSharedPreferences("login_session",MODE_PRIVATE);
                                     SharedPreferences.Editor editor = pref.edit();
-                                    editor.putString("YN","yes");
-                                    editor.putString("ID",userID);
-                                    editor.putString("PW",userPass);
+                                    editor.putString("token",token);
                                     editor.commit();
                                 }else{
-                                    SharedPreferences pref = getSharedPreferences("login_session",MODE_PRIVATE);
                                     SharedPreferences.Editor editor = pref.edit();
-                                    editor.putString("YN","no");
+                                    editor.putString("token","");
                                 }
                                 Toast.makeText(getApplicationContext(),"로그인에 성공하였습니다.",Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
