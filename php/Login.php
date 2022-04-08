@@ -2,13 +2,12 @@
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
 
-    $con = mysqli_connect("jhk.n-e.kr", "dsu_cloud_prj", "cloud_prj_jhk", "cloud_classprj","3306");
-    mysqli_query($con,'SET NAMES utf8');
+    include("db.php");
 
     $userID = $_POST["userID"];
     $userPassword = $_POST["userPassword"];
 
-    $statement = mysqli_prepare($con, "SELECT userID,userPassword FROM member WHERE userID = ? AND userPassword = ?");
+    $statement = mysqli_prepare($conn, "SELECT userID,userPassword FROM member WHERE userID = ? AND userPassword = ?");
     mysqli_stmt_bind_param($statement, "ss", $userID, $userPassword);
     mysqli_stmt_execute($statement);
 
@@ -24,7 +23,7 @@
         $response["userPassword"] = $userPassword;
         $response["token"] = $token;
     }
-
+    mysqli_close($conn);
     echo json_encode($response);
 
 
