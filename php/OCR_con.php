@@ -74,6 +74,7 @@
             //header('location:'.$prevPage);
             $response_to_apk array();
             $response_to_apk["success"] = false;
+            $response_to_apk["book_content"] = $book_content;
             $conn->close();
             echo json_encode($response_to_apk);
         } else {
