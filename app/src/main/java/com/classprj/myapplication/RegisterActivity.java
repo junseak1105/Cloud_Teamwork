@@ -24,6 +24,8 @@ public class RegisterActivity extends AppCompatActivity {
     private Button btn_register;
     private Button btn_id_overlap_chk;
 
+    int overlap_chk = 0; //아이디 중복체크 수행여부
+
     @Override
     protected void onCreate(Bundle savedInstanceState) { // 액티비티 시작시 처음으로 실행되는 생명주기!
         super.onCreate(savedInstanceState);
@@ -52,6 +54,7 @@ public class RegisterActivity extends AppCompatActivity {
                             System.out.println(overlap);
                             if (overlap) { // 사용가능 ID일 경우
                                 Toast.makeText(getApplicationContext(), "사용 가능한 ID 입니다.", Toast.LENGTH_SHORT).show();
+                                overlap_chk = 1;
                             } else { // 이미 있는 ID일 경우
                                 Toast.makeText(getApplicationContext(), "사용 불가능한 ID 입니다.", Toast.LENGTH_SHORT).show();
                                 return;
@@ -89,8 +92,11 @@ public class RegisterActivity extends AppCompatActivity {
                             String returnMsg = jsonObject.getString("returnMsg");
 
                             //아이디, 이메일 중복체크 후 회원등록 진행
-                            if(returnMsg.equals("ID_already_exists")) {
-                                Toast.makeText(getApplicationContext(),"이미 존재하는 아이디입니다.",Toast.LENGTH_SHORT).show();
+                            //if(returnMsg.equals("ID_already_exists")) {
+                            //    Toast.makeText(getApplicationContext(),"이미 존재하는 아이디입니다.",Toast.LENGTH_SHORT).show();
+                            //}
+                            if(overlap_chk == 0){
+                                Toast.makeText(getApplicationContext(),"아이디 중복확인을 해주세요.",Toast.LENGTH_SHORT).show();
                             }else if(returnMsg.equals("Email_already_exists")){
                                 Toast.makeText(getApplicationContext(),"이미 존재하는 이메일입니다.",Toast.LENGTH_SHORT).show();
                             }else if (success) { // 회원등록에 성공한 경우
