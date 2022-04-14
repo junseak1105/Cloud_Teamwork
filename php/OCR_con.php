@@ -6,6 +6,7 @@
         $url = "https://dfi2dqet3q.apigw.ntruss.com/custom/v1/15134/28c52046370d75aa67de6e9b6d87c43e0fe56a0e2ce859c1911b99f48ac90e8f/general";
     $image_file = "http://visualoft.kr/wp-content/uploads/2016/02/screenshot_1-1-710x355.png";
     //$image_url = "";
+    //객체생성
     class params{
         public $version;
         public $requestId;
