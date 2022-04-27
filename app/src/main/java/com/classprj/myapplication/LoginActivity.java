@@ -15,7 +15,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 import com.classprj.myapplication.member.LoginRequest;
-import com.classprj.myapplication.member.login_chk;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
