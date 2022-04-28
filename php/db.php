@@ -6,7 +6,7 @@ $host="jhk.n-e.kr"; //자신이 사용하는 호스트 ip로 입력해도됌
 $user="dsu_cloud_prj";      
 $pass="cloud_prj_jhk";       
 $dbname= "cloud_classprj"; //자신이 지금 사용하는 dbname 모르면 show databases; 확인
-$dbport="3306"
+$dbport="3306";
 
 $conn=mysqli_connect($host,$user,$pass,$dbname,$dbport);
 //한글 입력 하게
