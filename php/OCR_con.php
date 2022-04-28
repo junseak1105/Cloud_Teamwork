@@ -67,27 +67,25 @@
         //json 파싱 끝
         
         //sql 책 내용 입력 시작
-        $sql = "insert into book_content(book_id,book_page,book_content values(book_id = '$book_id', book_page = '$book_page', book_content = '$book_content';";
-    
-        if ($conn->query($sql) === TRUE) {
-            //echo "Record deleted successfully";
-            //header('location:'.$prevPage);
-            $response_to_apk array();
-            $response_to_apk["success"] = false;
-            $response_to_apk["book_content"] = $book_content;
-            $conn->close();
-            echo json_encode($response_to_apk);
-        } else {
-            //echo "Error deleting record: " . $conn->error;
-            //header('location:'.$prevPage);
-            $response_to_apk array();
-            $response_to_apk["success"] = false;
-            $conn->close();
-            echo json_encode($response_to_apk);
+        $book_content_arr = explode(".", $book_content);
+        for($i=0;$i<count($book_content_arr);$i++){
+            $storedProc = 'call content_insert(,?,?)';
+            $statement = mysqli_prepare($conn,$storedProc);
+            mysqli_stmt_bind_param($statement,'ss',$book_id,$book_content[$i]);
+            mysqli_stmt_execute($statement);
+            mysqli_stmt_bind_result($statement,$returnMsg);
+            $response = array();
+            $response["success"] = false;
+
+            while(mysqli_stmt_fetch($statement)) {
+                $response["success"] = true;
+                $response["returnMsg"] = $returnMsg;
+            }
         }
+        echo json_encode($response);
         //sql 책 내용 입력 끝
     } else {
-    //echo "ERROR: ".$response;
-        echo json_encode($response_to_apk);
+        //echo "ERROR: ".$response;
+        echo json_encode($response);
     }
 ?>
