@@ -1,6 +1,9 @@
 <?php
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
+    include("db.php");
+    $book_id = $_POST["book_id"];
+    $book_page = $_POST["book_page"];
 
     $client_secret = "bm53elJtZllrbWh2ZWpZTmN2WmRHb253WXJjRWZWcFQ=";
         $url = "https://dfi2dqet3q.apigw.ntruss.com/custom/v1/15134/28c52046370d75aa67de6e9b6d87c43e0fe56a0e2ce859c1911b99f48ac90e8f/general";
@@ -52,8 +55,37 @@
 
     //echo $status_code;
     if($status_code == 200) {
-        echo $response;
+        echo $response;//OCR 결과
+        //json 파싱 시작
+        $arr = json_decode($response,true);
+        $book_content ="";
+        foreach($arr["images"] as $arr2) {
+            foreach($arr2["fields"] as $text) {
+                $book_content = $book_content."&nbsp".$text["inferText"];
+            }
+        }
+        //json 파싱 끝
+        
+        //sql 책 내용 입력 시작
+        $book_content_arr = explode(".", $book_content);
+        for($i=0;$i<count($book_content_arr);$i++){
+            $storedProc = 'call content_insert(,?,?)';
+            $statement = mysqli_prepare($conn,$storedProc);
+            mysqli_stmt_bind_param($statement,'ss',$book_id,$book_content[$i]);
+            mysqli_stmt_execute($statement);
+            mysqli_stmt_bind_result($statement,$returnMsg);
+            $response = array();
+            $response["success"] = false;
+
+            while(mysqli_stmt_fetch($statement)) {
+                $response["success"] = true;
+                $response["returnMsg"] = $returnMsg;
+            }
+        }
+        echo json_encode($response);
+        //sql 책 내용 입력 끝
     } else {
-    echo "ERROR: ".$response;
+        //echo "ERROR: ".$response;
+        echo json_encode($response);
     }
 ?>
