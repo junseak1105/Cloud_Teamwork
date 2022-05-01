@@ -66,12 +66,18 @@
         }
         //json 파싱 끝
         
+        //$book_content = "안녕하세요 제 이름은 김재훈입니다! 이걸 나누면 점단위로 분해? 되어야 하는데 이게 잘. 되나 모르겠네요";
+        //$book_id = "test";
         //sql 책 내용 입력 시작
-        $book_content_arr = explode(".", $book_content);
+        $book_content_arr = preg_split('/([^.:!?]+[.:!?]+)/', $book_content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        // for($i=0;$i<count($book_content_arr);$i++){
+        //     echo $book_content_arr[$i];
+        //     echo "<br>";
+        // }
         for($i=0;$i<count($book_content_arr);$i++){
-            $storedProc = 'call content_insert(,?,?)';
+            $storedProc = 'call insert_content(?,?)';
             $statement = mysqli_prepare($conn,$storedProc);
-            mysqli_stmt_bind_param($statement,'ss',$book_id,$book_content[$i]);
+            mysqli_stmt_bind_param($statement,'ss',$book_id,$book_content_arr[$i]);
             mysqli_stmt_execute($statement);
             mysqli_stmt_bind_result($statement,$returnMsg);
             $response = array();
@@ -88,4 +94,6 @@
         //echo "ERROR: ".$response;
         echo json_encode($response);
     }
+
+        
 ?>
