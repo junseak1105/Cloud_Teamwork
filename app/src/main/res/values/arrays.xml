@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="array_book">
+        <item>내부 저장소</item>
+        <item>외부 저장소</item>
+
+    </string-array>
+    <string-array name="array_font_size">
+        <item>14pt</item>
+        <item>16pt</item>
+    </string-array>
+</resources>
