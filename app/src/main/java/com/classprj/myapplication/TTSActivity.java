@@ -3,6 +3,7 @@ package com.classprj.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,29 +14,36 @@ import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.classprj.myapplication.read.PlayState;
 import com.classprj.myapplication.read.TextPlayer;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class TTSActivity extends AppCompatActivity implements TextPlayer, View.OnClickListener {
 
-    private static String IP_ADDRESS = "jhk.n-e.kr";
-    private static String TAG = "phpreviewdownload";
+    String idx;
+
+    private static String url = "jhk.n-e.kr";
     private String mJsonString;
 
 
@@ -50,7 +58,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     private int lastPlayIndex = 0;
 
     //book이 맞나?
-    private ArrayList<Book> mArrayList;
+    private ArrayList<BookData> booklist;
     private TextToSpeech tts;
 
     Button playBtn, pauseBtn, stopBtn;
@@ -60,12 +68,18 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tts);
-        initView();
 
+        Intent intent = getIntent();
+        idx = intent.getExtras().getString("idx");
+
+        BookRequest(url, idx);
+        initView();
         initTTS();
+
 
     }
 
+    //초기화
     private void initView() {
         playBtn = findViewById(R.id.btn_play);
         pauseBtn = findViewById(R.id.btn_pause);
@@ -77,6 +91,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         stopBtn.setOnClickListener(this);
     }
 
+    //TTS 기능
     private void initTTS() {
         params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, null);
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -132,6 +147,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         showState(playState.getState());
     }
 
+    //버튼 관리
     @Override
     public void startPlay() {
         String content = null;/*inputEditText.getText().toString();*/
@@ -159,6 +175,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         clearAll();
     }
 
+    //글자 색
     private void changeHighlight(final int start, final int end) {
         runOnUiThread(new Runnable() {
             @Override
@@ -173,10 +190,12 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         spannable = (SpannableString) contentTextView.getText();
     }
 
+    //실질적 tts 읽는 부분
     private void startSpeak(final String text) {
         tts.speak(text, TextToSpeech.QUEUE_ADD, params, text);
     }
 
+    //멈췄을때
     private void clearAll() {
         playState = PlayState.STOP;
         standbyIndex = 0;
@@ -214,158 +233,49 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         super.onDestroy();
     }
 
-    private class GetData extends AsyncTask<String, void, String> {
-        ProgressDialog progressDialog;
-        String errorString = null;
+    private void BookRequest(String url, String idx) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    String Book_ID = response.getString("BOOK_ID");
+                    String Book_Page = response.getString("BOOK_PAGE");
+                    String Book_Content = response.getString("BOOK_CONTENT");
+                    String Content_Length = response.getString("CONTENT_LENGTH");
+                    String Book_Page_Idx = response.getString("BOOK_PAGE_IDX");
+                    JSONArray jsonArray = response.getJSONArray(idx);
 
-        // 백그라운드 작업 전
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject item = jsonArray.getJSONObject(i);
+                        String b_id = item.getString(Book_ID);
+                        String b_page = item.getString(Book_Page);
+                        String b_content = item.getString(Book_Content);
+                        String c_length = item.getString(Content_Length);
+                        String b_page_idx = item.getString(Book_Page_Idx);
 
+                        BookData bookData = new BookData();
 
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
+                        bookData.setBOOK_ID(b_id);
+                        bookData.setBOOK_CONTENT(b_content);
+                        bookData.setBOOK_PAGE(b_page);
+                        bookData.setBOOK_CONTENT(b_content);
+                        bookData.setCONTENT_LENGTH(c_length);
+                        bookData.setBOOK_PAGE_IDX(b_page_idx);
 
-            progressDialog.dismiss();
-            Log.d(TAG, "response - " + result);
+                        booklist.add(bookData);
 
-            if (result == null) {
-                contentTextView.setText(errorString);
-            } else {
-
-                mJsonString = result;
-                showResult();
-            }
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            String serverURL = strings[0];
-            String name = strings[1];
-
-            String postParameters = "name=" + name;
-            try {
-
-                URL url = new URL(serverURL);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-
-
-                httpURLConnection.setReadTimeout(5000);
-                httpURLConnection.setConnectTimeout(5000);
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoInput(true);
-                httpURLConnection.connect();
-
-
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                outputStream.write(postParameters.getBytes("UTF-8"));
-                outputStream.flush();
-                outputStream.close();
-
-
-                int responseStatusCode = httpURLConnection.getResponseCode();
-                Log.d(TAG, "response code - " + responseStatusCode);
-
-                InputStream inputStream;
-                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
-                    inputStream = httpURLConnection.getInputStream();
-                } else {
-                    inputStream = httpURLConnection.getErrorStream();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
 
-
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-                StringBuilder sb = new StringBuilder();
-                String line;
-
-                while ((line = bufferedReader.readLine()) != null) {
-                    sb.append(line);
-                }
-
-                bufferedReader.close();
-
-                return sb.toString().trim();
-
-
-            } catch (Exception e) {
-
-                Log.d(TAG, "GetData : Error ", e);
-                errorString = e.toString();
-
-                return null;
             }
-        }
-
-        private void showResult() {
-
-            String IDX = "idx";
-            String BOOK_ID = "book_id";
-            String BOOK_PAGE = "book_page";
-            String BOOK_CONTENT = "book_content";
-            String CONTENT_LENGTH = "content_length";
-            String BOOK_PAGE_IDX = "book_page_idx";
-
-            try {
-                JSONObject jsonObject = new JSONObject(mJsonString);
-                JSONArray jsonArray = jsonObject.getJSONArray(IDX);
-
-                for(int i = 0; i<jsonArray.length(); i++){
-                    JSONObject item = jsonArray.getJSONObject(i);
-
-                    
-                }
-            }catch (Exception e){
-
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
             }
-
-            /*
-            String TAG_JSON="user";
-            String TAG_rate = "rate";
-            String TAG_userID ="userID";
-            String TAG_title="title";
-            String TAG_review="review";
-
-
-
-            try {
-                JSONObject jsonObject = new JSONObject(mJsonString);
-                JSONArray jsonArray = jsonObject.getJSONArray(TAG_JSON);
-
-                for(int i=0;i<jsonArray.length();i++){
-
-                    JSONObject item = jsonArray.getJSONObject(i);
-
-
-                    String rate = item.getString(TAG_rate);
-                    String userID = item.getString(TAG_userID);
-                    String title =item.getString(TAG_title);
-                    String review =item.getString(TAG_review);
-
-
-                    ReviewData ReviewData = new ReviewData();
-
-                    ReviewData.setReview_rate(rate);
-                    ReviewData.setReview_userID(userID);
-                    ReviewData.setReview_title(title);
-                    ReviewData.setReview_review(review);
-
-
-                    mArrayList.add(ReviewData);
-                    mAdapter.notifyDataSetChanged();
-                }
-
-
-
-            } catch (JSONException e) {
-
-                Log.d(TAG, "showResult : ", e);
-            }
-            */
-        }
+        });
+        queue.add(jsonObjectRequest);
     }
 }
