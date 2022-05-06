@@ -46,8 +46,6 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     String idx;
 
     private static String url = "jhk.n-e.kr";
-    private String mJsonString;
-
 
     //책받을 번들 << 알아볼것
     private final Bundle params = new Bundle();
@@ -79,39 +77,6 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         initView();
         initTTS();
 
-        gonext = (Button)findViewById(R.id.btn_next);
-        gonext.setOnClickListener(new Button.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                if(nowpage <= booklist.size()) {
-                    contentTextView.setText(booklist.get(nowpage + 1).getBOOK_CONTENT());
-                    pagecheck.setText(nowpage+"/"+booklist.size());
-                    nowpage++;
-                }else{
-                    AlertDialog.Builder malert = new AlertDialog.Builder(TTSActivity.this);
-                    malert.setTitle("");
-                    malert.setMessage("다 읽었습니다. 예/아니오로 나눌것");
-
-                    malert.setPositiveButton("Ok",new DialogInterface.OnClickListener(){
-                        public void onClick(DialogInterface dialog,int which){
-                            // OK 버튼을 눌렸을 경우
-                            Toast.makeText(getApplicationContext(),"Pressed OK",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    malert.setNegativeButton("Cancle", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Cancle 버튼을 눌렸을 경우
-                            Toast.makeText(getApplicationContext(),"Pressed Cancle",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    malert.show();
-                }
-            }
-        });
-
     }
 
     //초기화
@@ -120,6 +85,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         pauseBtn = findViewById(R.id.btn_pause);
         stopBtn = findViewById(R.id.btn_stop);
         contentTextView = findViewById(R.id.tv_content);
+        gonext = (Button)findViewById(R.id.btn_next);
 
         playBtn.setOnClickListener(this);
         pauseBtn.setOnClickListener(this);
@@ -178,6 +144,9 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
             case R.id.btn_stop:
                 stopPlay();
                 break;
+            case R.id.btn_next:
+                nextpage();
+                break;
         }
         showState(playState.getState());
     }
@@ -207,6 +176,35 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     public void stopPlay() {
         tts.stop();
         clearAll();
+    }
+
+    public void nextpage() {
+        if(nowpage < booklist.size()) {
+            contentTextView.setText(booklist.get(nowpage + 1).getBOOK_CONTENT());
+            pagecheck.setText(nowpage+"/"+booklist.size());
+            nowpage++;
+        }else{
+            AlertDialog.Builder malert = new AlertDialog.Builder(TTSActivity.this);
+            malert.setTitle("");
+            malert.setMessage("다 읽었습니다. 예/아니오로 나눌것");
+
+            malert.setPositiveButton("Ok",new DialogInterface.OnClickListener(){
+                public void onClick(DialogInterface dialog,int which){
+                    // OK 버튼을 눌렸을 경우
+                    Toast.makeText(getApplicationContext(),"Pressed OK",
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+            malert.setNegativeButton("Cancle", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Cancle 버튼을 눌렸을 경우
+                    Toast.makeText(getApplicationContext(),"Pressed Cancle",
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+            malert.show();
+        }
     }
 
     //글자 색
@@ -261,6 +259,8 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         tts.shutdown();
         super.onDestroy();
     }
+
+    // 책 내용 요청
     private void BookRequest(String url, String idx) {
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
