@@ -2,7 +2,9 @@ package com.classprj.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -56,13 +58,14 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     private Spannable spannable;
     private int standbyIndex = 0;
     private int lastPlayIndex = 0;
+    int nowpage= 0;
 
     //book이 맞나?
     private ArrayList<BookData> booklist;
     private TextToSpeech tts;
 
-    Button playBtn, pauseBtn, stopBtn;
-    TextView contentTextView;
+    Button playBtn, pauseBtn, stopBtn, gonext;
+    TextView contentTextView, pagecheck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +79,38 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         initView();
         initTTS();
 
+        gonext = (Button)findViewById(R.id.btn_next);
+        gonext.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                if(nowpage <= booklist.size()) {
+                    contentTextView.setText(booklist.get(nowpage + 1).getBOOK_CONTENT());
+                    pagecheck.setText(nowpage+"/"+booklist.size());
+                    nowpage++;
+                }else{
+                    AlertDialog.Builder malert = new AlertDialog.Builder(TTSActivity.this);
+                    malert.setTitle("");
+                    malert.setMessage("다 읽었습니다. 예/아니오로 나눌것");
+
+                    malert.setPositiveButton("Ok",new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog,int which){
+                            // OK 버튼을 눌렸을 경우
+                            Toast.makeText(getApplicationContext(),"Pressed OK",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    malert.setNegativeButton("Cancle", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Cancle 버튼을 눌렸을 경우
+                            Toast.makeText(getApplicationContext(),"Pressed Cancle",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    malert.show();
+                }
+            }
+        });
 
     }
 
@@ -150,9 +185,8 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     //버튼 관리
     @Override
     public void startPlay() {
-        String content = null;/*inputEditText.getText().toString();*/
+        String content = booklist.get(nowpage).getBOOK_CONTENT();
         if (playState.isStopping() && !tts.isSpeaking()) {
-            setContentFromEditText(content);
             startSpeak(content);
         } else if (playState.isWaiting()) {
             standbyIndex += lastPlayIndex;
@@ -183,11 +217,6 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
                 spannable.setSpan(colorSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         });
-    }
-
-    private void setContentFromEditText(String content) {
-        contentTextView.setText(content, TextView.BufferType.SPANNABLE);
-        spannable = (SpannableString) contentTextView.getText();
     }
 
     //실질적 tts 읽는 부분
@@ -232,7 +261,6 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         tts.shutdown();
         super.onDestroy();
     }
-
     private void BookRequest(String url, String idx) {
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
