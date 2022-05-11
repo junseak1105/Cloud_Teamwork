@@ -13,7 +13,7 @@ $conn=mysqli_connect($host,$user,$pass,$dbname,$dbport);
 mysqli_set_charset($conn,"utf8");
 
  if($conn){
-        echo "db성공";
+        //echo "db성공";
 }else{
        echo "db실패";
 }

@@ -38,6 +38,10 @@ import org.json.JSONObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -45,7 +49,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     String idx;
 
-    private static String url = "http://jhk.n-e.kr:8080";
+    private static String url = "http://127.0.0.1/book_content.php";
 
     //책받을 번들 << 알아볼것
     private final Bundle params = new Bundle();
@@ -64,6 +68,9 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     Button playBtn, pauseBtn, stopBtn, gonext;
     TextView contentTextView, pagecheck;
+
+    //테스트용
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +116,6 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String s) {
-
             }
 
             @Override
@@ -267,11 +273,11 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    String Book_ID = response.getString("BOOK_ID");
-                    String Book_Page = response.getString("BOOK_PAGE");
-                    String Book_Content = response.getString("BOOK_CONTENT");
-                    String Content_Length = response.getString("CONTENT_LENGTH");
-                    String Book_Page_Idx = response.getString("BOOK_PAGE_IDX");
+                    String Book_ID = response.getString("book_id");
+                    String Book_Page = response.getString("book_page");
+                    String Book_Content = response.getString("book_content");
+                    String Content_Length = response.getString("content_length");
+                    String Book_Page_Idx = response.getString("book_page_idx");
                     JSONArray jsonArray = response.getJSONArray(idx);
 
                     for (int i = 0; i < jsonArray.length(); i++) {
@@ -307,4 +313,5 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         });
         queue.add(jsonObjectRequest);
     }
+
 }
