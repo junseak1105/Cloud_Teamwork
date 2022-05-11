@@ -45,7 +45,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     String idx;
 
-    private static String url = "jhk.n-e.kr";
+    private static String url = "http://jhk.n-e.kr:8080";
 
     //책받을 번들 << 알아볼것
     private final Bundle params = new Bundle();
@@ -71,9 +71,9 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         setContentView(R.layout.activity_tts);
 
         Intent intent = getIntent();
-        idx = intent.getExtras().getString("idx");
+        //idx = intent.getExtras().getString("idx");
 
-        BookRequest(url, idx);
+        BookRequest();
         initView();
         initTTS();
 
@@ -261,7 +261,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     }
 
     // 책 내용 요청
-    private void BookRequest(String url, String idx) {
+    private void BookRequest() {
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -302,6 +302,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.d("Error","db연결 안됨");
             }
         });
         queue.add(jsonObjectRequest);

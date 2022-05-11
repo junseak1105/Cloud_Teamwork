@@ -29,7 +29,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     final private static String TAG = "tag";
-    Button btn_photo;
+    Button btn_photo, btn_tts;
     ImageView iv_photo;
     final static int TAKE_PICTURE = 1;
 
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         iv_photo = findViewById(R.id.iv_photo);
         btn_photo = findViewById(R.id.btn_photo);
+        btn_tts = findViewById(R.id.btn_tts);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -59,6 +60,13 @@ public class MainActivity extends AppCompatActivity {
                         startActivityForResult(cameraIntent, TAKE_PICTURE);
                         break;
                 }
+            }
+        });
+        btn_tts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ttsintent = new Intent(MainActivity.this, TTSActivity.class);
+                startActivity(ttsintent);
             }
         });
 
