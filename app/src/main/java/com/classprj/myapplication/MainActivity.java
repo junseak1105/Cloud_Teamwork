@@ -6,14 +6,20 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -24,22 +30,24 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
     final private static String TAG = "tag";
-    Button btn_photo;
-    ImageView iv_photo;
-    final static int TAKE_PICTURE = 1;
+    private static final int REQUEST_IMAGE_CAPTURE = 672;
+    private String imageFilePath;
+    private Uri photoUri;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        iv_photo = findViewById(R.id.iv_photo);
-        btn_photo = findViewById(R.id.btn_photo);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -50,99 +58,104 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        btn_photo.setOnClickListener(new View.OnClickListener() {
+        //카메라 시작
+        findViewById(R.id.btnCamera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.btn_photo:
-                        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                        startActivityForResult(cameraIntent, TAKE_PICTURE);
-                        break;
-                }
+                sendTakePhotoIntent();
             }
         });
+        //카메라 끝
 
-        //로그인 토큰 체크
-        SharedPreferences pref = getSharedPreferences("login_session",MODE_PRIVATE);
-        if(!pref.getString("token","").equals("")) {
-            String token = pref.getString("token", "");
-            Toast.makeText(getApplicationContext(), token, Toast.LENGTH_SHORT).show();
-        };
-        //로그인 버튼 시작
-        Button SigninButton = (Button) findViewById(R.id.button_login);
-        SigninButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
-            }
-        });
-        //로그인 버튼 끝
 
-        GridView gridView = findViewById(R.id.gridview);
-        BookAdapter adapter = new BookAdapter();
-        adapter.addItem(new Book("a","322/500", R.drawable.a1));
-        adapter.addItem(new Book("b","322/500", R.drawable.a1));
-        adapter.addItem(new Book("c","322/500", R.drawable.a1));
-        adapter.addItem(new Book("d","322/500", R.drawable.a1));
-        adapter.addItem(new Book("e","322/500", R.drawable.a1));
-        adapter.addItem(new Book("f","322/500", R.drawable.a1));
-        adapter.addItem(new Book("g","322/500", R.drawable.a1));
-        adapter.addItem(new Book("h","322/500", R.drawable.a1));
-        adapter.addItem(new Book("i","322/500", R.drawable.a1));
-        gridView.setAdapter(adapter);
     }//onCreate
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        switch (requestCode) {
-            case TAKE_PICTURE:
-                if (resultCode == RESULT_OK && intent.hasExtra("data")) {
-                    Bitmap bitmap = (Bitmap) intent.getExtras().get("data");
-                    if (bitmap != null) {
-                        iv_photo.setImageBitmap(bitmap);
-                    }
-                }
-                break;
-        }
-    }
-    public class BookAdapter extends BaseAdapter{
-        ArrayList<Book> items = new ArrayList<>();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
 
-        @Override
-        public int getCount(){
-            return items.size();
-        }
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
+            ExifInterface exif = null;
 
-        @Override
-        public Object getItem(int i) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return 0;
-        }
-
-        public void addItem(Book book){
-            this.items.add(book);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Book_View book_view = null;
-            if(convertView==null){
-                book_view = new Book_View(getApplicationContext());
-            }else{
-                book_view=(Book_View) convertView;
+            try {
+                exif = new ExifInterface(imageFilePath);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            Book book = items.get(position);
-            book_view.setNameView(book.getBook_name());
-            book_view.setNumberView(book.getTotal_page());
-            book_view.setImageView(book.getBook_image());
 
-            return book_view;
+            int exifOrientation;
+            int exifDegree;
+
+            if (exif != null) {
+                exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                exifDegree = exifOrientationToDegrees(exifOrientation);
+            } else {
+                exifDegree = 0;
+            }
+            uploadFile(imageFilePath);
+            ((ImageView) findViewById(R.id.iv_photo)).setImageBitmap(rotate(bitmap, exifDegree));
         }
     }
+
+    private int exifOrientationToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            return 90;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+            return 180;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+            return 270;
+        }
+        return 0;
+    }
+
+    private Bitmap rotate(Bitmap bitmap, float degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+
+    private void sendTakePhotoIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+
+            if (photoFile != null) {
+                photoUri = FileProvider.getUriForFile(this, getPackageName(), photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "TEST_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,      /* prefix */
+                ".jpg",         /* suffix */
+                storageDir          /* directory */
+        );
+        imageFilePath = image.getAbsolutePath();
+        return image;
+    }
+
+    public void uploadFile(String filePath){
+        String url = "http://10.0.2.2/phpinfo.php";
+        try {
+            UploadFile uploadFile = new UploadFile(MainActivity.this);
+            uploadFile.setPath(filePath);
+            uploadFile.execute(url);
+        } catch (Exception e){
+        }
+    }
+
+
 }
