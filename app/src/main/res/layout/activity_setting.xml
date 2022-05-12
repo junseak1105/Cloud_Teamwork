@@ -1,7 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/settings_fragment"
     android:name="com.classprj.myapplication.SettingPreferenceFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    />
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:title="계정 정보"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+        <LinearLayout
+            android:id="@+id/setting_Id"
+            android:key="id_screen"
+            android:title="아이디 들어갈 곳"
+            android:text="아이디 정보"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:orientation="vertical" />
+
+        <Button
+            android:text="사용자 책 관리"
+            android:id="@+id/btnBook_list"
+            android:key="book_list"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"/>
+
+        <Button
+            android:text="로그아웃"
+            android:id="@+id/btn_logout"
+            android:key="id_screen"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"/>
+
+        <Button
+            android:text="회원탈퇴"
+            android:id="@+id/btnuser_Withdrawal"
+            android:key="book_list"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"/>
+    </LinearLayout>
+
+</LinearLayout>
