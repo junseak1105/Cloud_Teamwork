@@ -34,7 +34,7 @@ import android.widget.Toast;
 
 
 
-public class MainActivity extends Activity{
+public class imageupload extends Activity{
 
 
 
@@ -66,7 +66,7 @@ public class MainActivity extends Activity{
 
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.imageupload);
 
         uploadButton = (Button)findViewById(R.id.uploadButton);
 
@@ -92,7 +92,7 @@ public class MainActivity extends Activity{
 
 
 
-                dialog = ProgressDialog.show(MainActivity.this, "", "Uploading file...", true);
+                dialog = ProgressDialog.show(imageupload.this, "", "Uploading file...", true);
 
 
 
@@ -320,7 +320,7 @@ public class MainActivity extends Activity{
 
                             messageText.setText(msg);
 
-                            Toast.makeText(MainActivity.this, "File Upload Complete.",
+                            Toast.makeText(imageupload.this, "File Upload Complete.",
 
                                     Toast.LENGTH_SHORT).show();
 
@@ -358,7 +358,7 @@ public class MainActivity extends Activity{
 
                         messageText.setText("MalformedURLException Exception : check script url.");
 
-                        Toast.makeText(MainActivity.this, "MalformedURLException",
+                        Toast.makeText(imageupload.this, "MalformedURLException",
 
                                 Toast.LENGTH_SHORT).show();
 
@@ -386,7 +386,7 @@ public class MainActivity extends Activity{
 
                         messageText.setText("Got Exception : see logcat ");
 
-                        Toast.makeText(MainActivity.this, "Got Exception : see logcat ",
+                        Toast.makeText(imageupload.this, "Got Exception : see logcat ",
 
                                 Toast.LENGTH_SHORT).show();
 
