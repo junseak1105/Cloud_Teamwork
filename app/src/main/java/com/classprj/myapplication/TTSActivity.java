@@ -3,21 +3,15 @@ package com.classprj.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,8 +20,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.classprj.myapplication.read.PlayState;
 import com.classprj.myapplication.read.TextPlayer;
@@ -36,12 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -49,7 +37,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     String idx;
 
-    private static String url = "http://127.0.0.1/book_content.php";
+    private static String url = "http://192.168.219.103:80/book_content.php";
 
     //책받을 번들 << 알아볼것
     private final Bundle params = new Bundle();
@@ -60,10 +48,10 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     private Spannable spannable;
     private int standbyIndex = 0;
     private int lastPlayIndex = 0;
-    int nowpage= 0;
+    int nowpage = 0;
 
     //book이 맞나?
-    private ArrayList<BookData> booklist;
+    ArrayList<BookData> booklist = new ArrayList<>();
     private TextToSpeech tts;
 
     Button playBtn, pauseBtn, stopBtn, gonext;
@@ -80,9 +68,37 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         Intent intent = getIntent();
         //idx = intent.getExtras().getString("idx");
 
-        BookRequest();
+
         initView();
-        initTTS();
+        RequestQueue queue = Volley.newRequestQueue(this);
+        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    for (int i = 0; i < response.length(); i++) {
+                        JSONObject jsonObject = response.getJSONObject(i);
+                        String Book_ID = jsonObject.getString("book_id");
+                        String Book_Page = jsonObject.getString("book_page");
+                        String Book_Content = jsonObject.getString("book_content");
+                        String Content_Length = jsonObject.getString("content_length");
+                        String Book_Page_Idx = jsonObject.getString("book_page_idx");
+
+                        booklist.add(new BookData(Book_ID ,Book_Page, Book_Content, Content_Length, Book_Page_Idx));
+
+                    }
+                    initTTS();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error){
+            }
+        });
+        queue.add(req);
+
+
 
     }
 
@@ -92,7 +108,8 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         pauseBtn = findViewById(R.id.btn_pause);
         stopBtn = findViewById(R.id.btn_stop);
         contentTextView = findViewById(R.id.tv_content);
-        gonext = (Button)findViewById(R.id.btn_next);
+        gonext = (Button) findViewById(R.id.btn_next);
+        pagecheck = findViewById(R.id.page_check);
 
         playBtn.setOnClickListener(this);
         pauseBtn.setOnClickListener(this);
@@ -101,6 +118,8 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     //TTS 기능
     private void initTTS() {
+        contentTextView.setText(booklist.get(nowpage).getBOOK_CONTENT());
+        pagecheck.setText(nowpage + "/" + booklist.size());
         params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, null);
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
@@ -185,19 +204,19 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     }
 
     public void nextpage() {
-        if(nowpage < booklist.size()) {
+        if (nowpage < booklist.size()) {
             contentTextView.setText(booklist.get(nowpage + 1).getBOOK_CONTENT());
-            pagecheck.setText(nowpage+"/"+booklist.size());
+            pagecheck.setText(nowpage + "/" + booklist.size());
             nowpage++;
-        }else{
+        } else {
             AlertDialog.Builder malert = new AlertDialog.Builder(TTSActivity.this);
             malert.setTitle("");
             malert.setMessage("다 읽었습니다. 예/아니오로 나눌것");
 
-            malert.setPositiveButton("Ok",new DialogInterface.OnClickListener(){
-                public void onClick(DialogInterface dialog,int which){
+            malert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
                     // OK 버튼을 눌렸을 경우
-                    Toast.makeText(getApplicationContext(),"Pressed OK",
+                    Toast.makeText(getApplicationContext(), "Pressed OK",
                             Toast.LENGTH_SHORT).show();
                 }
             });
@@ -205,7 +224,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     // Cancle 버튼을 눌렸을 경우
-                    Toast.makeText(getApplicationContext(),"Pressed Cancle",
+                    Toast.makeText(getApplicationContext(), "Pressed Cancle",
                             Toast.LENGTH_SHORT).show();
                 }
             });
@@ -268,50 +287,6 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     // 책 내용 요청
     private void BookRequest() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    String Book_ID = response.getString("book_id");
-                    String Book_Page = response.getString("book_page");
-                    String Book_Content = response.getString("book_content");
-                    String Content_Length = response.getString("content_length");
-                    String Book_Page_Idx = response.getString("book_page_idx");
-                    JSONArray jsonArray = response.getJSONArray(idx);
 
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject item = jsonArray.getJSONObject(i);
-                        String b_id = item.getString(Book_ID);
-                        String b_page = item.getString(Book_Page);
-                        String b_content = item.getString(Book_Content);
-                        String c_length = item.getString(Content_Length);
-                        String b_page_idx = item.getString(Book_Page_Idx);
-
-                        BookData bookData = new BookData();
-
-                        bookData.setBOOK_ID(b_id);
-                        bookData.setBOOK_CONTENT(b_content);
-                        bookData.setBOOK_PAGE(b_page);
-                        bookData.setBOOK_CONTENT(b_content);
-                        bookData.setCONTENT_LENGTH(c_length);
-                        bookData.setBOOK_PAGE_IDX(b_page_idx);
-
-                        booklist.add(bookData);
-
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("Error","db연결 안됨");
-            }
-        });
-        queue.add(jsonObjectRequest);
     }
-
 }

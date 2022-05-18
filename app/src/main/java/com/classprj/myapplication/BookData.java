@@ -1,20 +1,11 @@
 package com.classprj.myapplication;
 
 public class BookData {
-    String IDX;
     String BOOK_ID;
     String BOOK_PAGE;
     String BOOK_CONTENT;
     String CONTENT_LENGTH;
     String BOOK_PAGE_IDX;
-
-    public String getIDX() {
-        return IDX;
-    }
-
-    public void setIDX(String IDX) {
-        this.IDX = IDX;
-    }
 
     public String getBOOK_ID() {
         return BOOK_ID;
@@ -56,8 +47,7 @@ public class BookData {
         this.BOOK_PAGE_IDX = BOOK_PAGE_IDX;
     }
 
-    public BookData() {
-        this.IDX = IDX;
+    public BookData(String BOOK_ID, String BOOK_PAGE, String BOOK_CONTENT, String CONTENT_LENGTH, String BOOK_PAGE_IDX) {
         this.BOOK_ID = BOOK_ID;
         this.BOOK_PAGE = BOOK_PAGE;
         this.BOOK_CONTENT = BOOK_CONTENT;
