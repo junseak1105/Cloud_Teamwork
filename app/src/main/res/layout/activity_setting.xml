@@ -6,12 +6,11 @@
     android:gravity="center_horizontal"
     android:orientation="vertical">
 
-    <!--회원 아이디 불러올 곳-->
-    <EditText
-        android:id="@+id/setting_Id"
-        android:text="아이디 정보 ex)user1"
+    <TextView
+        android:id="@+id/setting_userID"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content" />
+        android:layout_width="wrap_content"
+        android:textSize="20dp"/>
     <Button
         android:id="@+id/btnBook_list_setting"
         android:layout_width="wrap_content"
