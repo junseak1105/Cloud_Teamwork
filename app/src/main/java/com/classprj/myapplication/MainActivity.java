@@ -24,8 +24,10 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -35,19 +37,43 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
 
     final private static String TAG = "tag";
     private static final int REQUEST_IMAGE_CAPTURE = 672;
     private String imageFilePath;
     private Uri photoUri;
+    ListView listView1;
+    ArrayAdapter<String> adapter;
+    ArrayList<String> listItem;
+
+    EditText editText1;
+    Button button1;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("OCR Reader");
+
+        editText1 = findViewById(R.id.editText1);
+        button1 = findViewById(R.id.button1);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -58,14 +84,27 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        //카메라 시작
-        findViewById(R.id.btnCamera).setOnClickListener(new View.OnClickListener() {
+
+
+        listItem = new ArrayList<String>();
+
+
+        // 아이템 추가한다.
+        button1.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                sendTakePhotoIntent();
+            public void onClick(View view) {
+
+                listItem.add(editText1.getText().toString());
+                adapter.notifyDataSetChanged(); // 변경되었음을 어답터에 알려준다.
+                editText1.setText("");
             }
         });
-        //카메라 끝
+
+
+        adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,listItem);
+        listView1 = findViewById(R.id.listView1);
+        listView1.setAdapter(adapter);
+        listView1.setOnItemClickListener(this);
 
 
     }//onCreate
@@ -93,8 +132,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 exifDegree = 0;
             }
-            uploadFile(imageFilePath);
-            ((ImageView) findViewById(R.id.iv_photo)).setImageBitmap(rotate(bitmap, exifDegree));
+           // ((ImageView) findViewById(R.id.iv_photo)).setImageBitmap(rotate(bitmap, exifDegree));
         }
     }
 
@@ -136,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "TEST_" + timeStamp + "_";
+        String imageFileName = "TEST_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,      /* prefix */
@@ -147,15 +185,39 @@ public class MainActivity extends AppCompatActivity {
         return image;
     }
 
-    public void uploadFile(String filePath){
-        String url = "http://10.0.2.2/phpinfo.php";
-        try {
-            UploadFile uploadFile = new UploadFile(MainActivity.this);
-            uploadFile.setPath(filePath);
-            uploadFile.execute(url);
-        } catch (Exception e){
-        }
-    }
 
+    //리스트뷰 선택시 이벤트 처리 메소드
+    @Override
+    public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+
+        //다이얼로그에 보여질 내용
+        final String[] classData = {"읽기", "페이지 추가", "삭제"};
+        final String title = ((TextView) arg1).getText().toString();
+        //다이얼로그 생성
+        new AlertDialog.Builder(this).setTitle(title)
+                .setItems(classData,new DialogInterface.OnClickListener(){
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 0){
+                            System.out.println("++++"+which);
+                        }
+                        if (which == 1){
+                            System.out.println("++++"+which);
+                            sendTakePhotoIntent();
+                        }
+                        if (which == 2){
+                            System.out.println("++++"+which);
+                            listItem.remove(arg2);
+                            adapter.notifyDataSetChanged();
+                        }
+                        Toast.makeText(getApplicationContext(), title+":" +which+"."+classData[which], Toast.LENGTH_SHORT).show();
+
+                    }
+
+
+                }).setNegativeButton("",null).show();
+
+    }
 
 }
