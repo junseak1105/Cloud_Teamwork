@@ -54,7 +54,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     ArrayList<BookData> booklist = new ArrayList<>();
     private TextToSpeech tts;
 
-    Button playBtn, pauseBtn, stopBtn, gonext;
+    Button playBtn, pauseBtn, stopBtn, gonext, goback;
     TextView contentTextView, pagecheck;
 
     //테스트용
@@ -109,17 +109,20 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         stopBtn = findViewById(R.id.btn_stop);
         contentTextView = findViewById(R.id.tv_content);
         gonext = (Button) findViewById(R.id.btn_next);
+        goback = (Button) findViewById(R.id.btn_back);
         pagecheck = findViewById(R.id.page_check);
 
         playBtn.setOnClickListener(this);
         pauseBtn.setOnClickListener(this);
         stopBtn.setOnClickListener(this);
+        gonext.setOnClickListener(this);
+        goback.setOnClickListener(this);
     }
 
     //TTS 기능
     private void initTTS() {
         contentTextView.setText(booklist.get(nowpage).getBOOK_CONTENT());
-        pagecheck.setText(nowpage + "/" + booklist.size());
+        pagecheck.setText((nowpage +1 ) + "/" + booklist.size());
         params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, null);
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
@@ -149,7 +152,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
             @Override
             public void onRangeStart(String utteranceId, int start, int end, int frame) {
-                changeHighlight(standbyIndex + start, standbyIndex + end);
+                //changeHighlight(standbyIndex + start, standbyIndex + end);
                 lastPlayIndex = start;
             }
         });
@@ -169,9 +172,14 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
             case R.id.btn_stop:
                 stopPlay();
                 break;
+
             case R.id.btn_next:
                 nextpage();
                 break;
+
+            case R.id.btn_back:
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
         }
         showState(playState.getState());
     }
@@ -179,7 +187,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     //버튼 관리
     @Override
     public void startPlay() {
-        String content = booklist.get(nowpage).getBOOK_CONTENT();
+        String content = contentTextView.getText().toString();
         if (playState.isStopping() && !tts.isSpeaking()) {
             startSpeak(content);
         } else if (playState.isWaiting()) {
@@ -206,8 +214,8 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     public void nextpage() {
         if (nowpage < booklist.size()) {
             contentTextView.setText(booklist.get(nowpage + 1).getBOOK_CONTENT());
-            pagecheck.setText(nowpage + "/" + booklist.size());
             nowpage++;
+            pagecheck.setText((nowpage+1) + "/" + booklist.size());
         } else {
             AlertDialog.Builder malert = new AlertDialog.Builder(TTSActivity.this);
             malert.setTitle("");
@@ -230,9 +238,11 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
             });
             malert.show();
         }
+
     }
 
     //글자 색
+    /*
     private void changeHighlight(final int start, final int end) {
         runOnUiThread(new Runnable() {
             @Override
@@ -241,7 +251,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
             }
         });
     }
-
+*/
     //실질적 tts 읽는 부분
     private void startSpeak(final String text) {
         tts.speak(text, TextToSpeech.QUEUE_ADD, params, text);
@@ -252,10 +262,11 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         playState = PlayState.STOP;
         standbyIndex = 0;
         lastPlayIndex = 0;
-
+/*
         if (spannable != null) {
             changeHighlight(0, 0); // remove highlight
         }
+*/
     }
 
     private void showState(final String msg) {
