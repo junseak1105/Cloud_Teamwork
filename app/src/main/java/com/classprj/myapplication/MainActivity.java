@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
 
     //listview 용
-    private static final String TAG_JSON="result";
+    private static final String TAG_JSON = "result";
     private static final String TAG_ID = "book_id";
     private static final String TAG_NAME = "book_name";
 
@@ -85,13 +85,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     ListView mlistView;
     String mJsonString;
 
-//    ListView listView1;
-//    ArrayAdapter<String> adapter;
-//    ArrayList<String> listItem;
 
     EditText editText1;
     Button button1;
-
 
 
     @Override
@@ -112,33 +108,22 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
             }
         }
 
-        //mTextViewResult = (TextView)findViewById(R.id.textView_main_result);
         mlistView = (ListView) findViewById(R.id.listView1);
         mArrayList = new ArrayList<>();
 
         GetData task = new GetData();
         task.execute("http://jhk.n-e.kr:8080/get_book_list.php");
 
-
-        //listItem = new ArrayList<String>();
-
-
         // 아이템 추가한다.
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-//                listItem.add(editText1.getText().toString());
-//                adapter.notifyDataSetChanged(); // 변경되었음을 어답터에 알려준다.
-//                editText1.setText("");
             }
         });
 
+        mlistView.setOnItemClickListener(this);
 
-//        adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,listItem);
-//        listView1 = findViewById(R.id.listView1);
-//        listView1.setAdapter(adapter);
-//        listView1.setOnItemClickListener(this);
 
 
     }//onCreate
@@ -166,7 +151,6 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
             } else {
                 exifDegree = 0;
             }
-           // ((ImageView) findViewById(R.id.iv_photo)).setImageBitmap(rotate(bitmap, exifDegree));
         }
     }
 
@@ -220,37 +204,34 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     }
 
 
-    //리스트뷰 선택시 이벤트 처리 메소드
+    //리스트뷰 선택시 이벤트 처리 메소드(다이얼로그) 삭제, 구현필요
     @Override
     public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 
         //다이얼로그에 보여질 내용
         final String[] classData = {"읽기", "페이지 추가", "삭제"};
-        final String title = ((TextView) arg1).getText().toString();
         //다이얼로그 생성
-        new AlertDialog.Builder(this).setTitle(title)
-                .setItems(classData,new DialogInterface.OnClickListener(){
+        new AlertDialog.Builder(this)
+                .setItems(classData, new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0){
-                            System.out.println("++++"+which);
+                        if (which == 0) { //읽기
+                            System.out.println("++++" + which);
                         }
-                        if (which == 1){
-                            System.out.println("++++"+which);
+                        if (which == 1) { //페이지추가(카메라)
+                            System.out.println("++++" + which);
                             sendTakePhotoIntent();
                         }
-                        if (which == 2){
-                            System.out.println("++++"+which);
-                            //listItem.remove(arg2);
-                            //adapter.notifyDataSetChanged();
+                        if (which == 2) { //삭제
+                            System.out.println("++++" + which);
                         }
-                        Toast.makeText(getApplicationContext(), title+":" +which+"."+classData[which], Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), ":" + which + "." + classData[which], Toast.LENGTH_SHORT).show();
 
                     }
 
 
-                }).setNegativeButton("",null).show();
+                }).setNegativeButton("", null).show();
 
     }
 
@@ -276,11 +257,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
             //mTextViewResult.setText(result);
             Log.d(TAG, "response  - " + result);
 
-            if (result == null){
+            if (result == null) {
 
                 //mTextViewResult.setText(errorString);
-            }
-            else {
+            } else {
 
                 mJsonString = result;
                 showResult();
@@ -309,10 +289,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 Log.d(TAG, "response code - " + responseStatusCode);
 
                 InputStream inputStream;
-                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
                     inputStream = httpURLConnection.getInputStream();
-                }
-                else{
+                } else {
                     inputStream = httpURLConnection.getErrorStream();
                 }
 
@@ -323,7 +302,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 StringBuilder sb = new StringBuilder();
                 String line;
 
-                while((line = bufferedReader.readLine()) != null){
+                while ((line = bufferedReader.readLine()) != null) {
                     sb.append(line);
                 }
 
@@ -346,19 +325,19 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     }
 
 
-    private void showResult(){
+    private void showResult() {
         try {
             JSONObject jsonObject = new JSONObject(mJsonString);
             JSONArray jsonArray = jsonObject.getJSONArray(TAG_JSON);
 
-            for(int i=0;i<jsonArray.length();i++){
+            for (int i = 0; i < jsonArray.length(); i++) {
 
                 JSONObject item = jsonArray.getJSONObject(i);
 
                 String id = item.getString(TAG_ID);
                 String name = item.getString(TAG_NAME);
 
-                HashMap<String,String> hashMap = new HashMap<>();
+                HashMap<String, String> hashMap = new HashMap<>();
 
                 hashMap.put(TAG_ID, id);
                 hashMap.put(TAG_NAME, name);
@@ -368,7 +347,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
             ListAdapter adapter = new SimpleAdapter(
                     MainActivity.this, mArrayList, R.layout.item_list,
-                    new String[]{TAG_ID,TAG_NAME},
+                    new String[]{TAG_ID, TAG_NAME},
                     new int[]{R.id.textView_list_id, R.id.textView_list_name}
             );
 
