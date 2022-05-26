@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
 import android.view.View;
 import android.widget.Button;
@@ -37,7 +38,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     String idx;
 
-    private static String url = "http://192.168.219.103:80/book_content.php";
+    private static String url = "http://jhk.n-e.kr:8080/book_content.php";
 
     //책받을 번들 << 알아볼것
     private final Bundle params = new Bundle();
@@ -152,7 +153,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
             @Override
             public void onRangeStart(String utteranceId, int start, int end, int frame) {
-                //changeHighlight(standbyIndex + start, standbyIndex + end);
+                changeHighlight(standbyIndex + start, standbyIndex + end);
                 lastPlayIndex = start;
             }
         });
@@ -189,6 +190,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     public void startPlay() {
         String content = contentTextView.getText().toString();
         if (playState.isStopping() && !tts.isSpeaking()) {
+            setContentFromEditText(content);
             startSpeak(content);
         } else if (playState.isWaiting()) {
             standbyIndex += lastPlayIndex;
@@ -212,18 +214,20 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     }
 
     public void nextpage() {
-        if (nowpage < booklist.size()) {
-            contentTextView.setText(booklist.get(nowpage + 1).getBOOK_CONTENT());
+        if (nowpage < booklist.size()-1) {
+            contentTextView.setText(booklist.get(nowpage+1).getBOOK_CONTENT());
             nowpage++;
             pagecheck.setText((nowpage+1) + "/" + booklist.size());
         } else {
             AlertDialog.Builder malert = new AlertDialog.Builder(TTSActivity.this);
             malert.setTitle("");
-            malert.setMessage("다 읽었습니다. 예/아니오로 나눌것");
+            malert.setMessage("다 읽었습니다.");
 
             malert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     // OK 버튼을 눌렸을 경우
+                    Intent intent = new Intent(TTSActivity.this, MainActivity.class);
+                    startActivity(intent);
                     Toast.makeText(getApplicationContext(), "Pressed OK",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -242,7 +246,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     }
 
     //글자 색
-    /*
+
     private void changeHighlight(final int start, final int end) {
         runOnUiThread(new Runnable() {
             @Override
@@ -251,7 +255,11 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
             }
         });
     }
-*/
+    private void setContentFromEditText(String content) {
+        contentTextView.setText(content, TextView.BufferType.SPANNABLE);
+        spannable = (SpannableString) contentTextView.getText();
+    }
+
     //실질적 tts 읽는 부분
     private void startSpeak(final String text) {
         tts.speak(text, TextToSpeech.QUEUE_ADD, params, text);
@@ -262,11 +270,11 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         playState = PlayState.STOP;
         standbyIndex = 0;
         lastPlayIndex = 0;
-/*
+
         if (spannable != null) {
             changeHighlight(0, 0); // remove highlight
         }
-*/
+
     }
 
     private void showState(final String msg) {
@@ -296,8 +304,4 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         super.onDestroy();
     }
 
-    // 책 내용 요청
-    private void BookRequest() {
-
-    }
 }
