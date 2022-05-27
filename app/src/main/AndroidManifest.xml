@@ -15,7 +15,9 @@
         android:theme="@style/Theme.MyApplication"
         android:usesCleartextTraffic="true"
       >
-
+        <activity
+            android:name=".TTSActivity"
+            android:exported="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">

@@ -233,6 +233,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) { //읽기
                             System.out.println("++++" + which);
+                            Intent intent = new Intent(MainActivity.this, TTSActivity.class);
+                            startActivity(intent);
                         }
                         if (which == 1) { //페이지추가(카메라)
                             System.out.println("++++" + which);
