@@ -35,9 +35,9 @@ import java.util.Locale;
 
 public class TTSActivity extends AppCompatActivity implements TextPlayer, View.OnClickListener {
 
-    String idx;
+    String book_id;
 
-    private static String url = "http://jhk.n-e.kr:8080/book_content.php";
+    private static String url = "http://jhk.n-e.kr:8080/book_content.php?";
 
     //책받을 번들 << 알아볼것
     private final Bundle params = new Bundle();
@@ -66,7 +66,8 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         setContentView(R.layout.activity_tts);
 
         Intent intent = getIntent();
-        //idx = intent.getExtras().getString("idx");
+        book_id = intent.getExtras().getString("book_id");
+        url = url+"book_id="+book_id;
 
 
         initView();

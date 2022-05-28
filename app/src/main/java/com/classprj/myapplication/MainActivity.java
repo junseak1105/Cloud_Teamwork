@@ -71,10 +71,9 @@ import org.json.JSONObject;
 
 public class MainActivity extends Activity implements AdapterView.OnItemClickListener {
 
-
+    private TextView titleTextView;
 
     final private static String TAG = "tag";
-
     private static final int REQUEST_IMAGE_CAPTURE = 672;
     private String imageFilePath;
     private Uri photoUri;
@@ -233,22 +232,25 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         return image;
     }
 
-
     //리스트뷰 선택시 이벤트 처리 메소드(다이얼로그) 삭제, 구현필요
+
     @Override
     public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 
         //다이얼로그에 보여질 내용
         final String[] classData = {"읽기", "페이지 추가", "삭제"};
+        titleTextView = (TextView) arg1.findViewById(R.id.textView_list_id);
+        final String title = titleTextView.getText().toString();
+        //HashMap<String, String> listViewItem = mArrayList.get(arg2);
         //다이얼로그 생성
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this).setTitle(title)
                 .setItems(classData, new DialogInterface.OnClickListener() {
-
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) { //읽기
                             System.out.println("++++" + which);
                             Intent intent = new Intent(MainActivity.this, TTSActivity.class);
+                            intent.putExtra("book_id",title);
                             startActivity(intent);
                         }
                         if (which == 1) { //페이지추가(카메라)
@@ -260,7 +262,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                             messageText  = (TextView)findViewById(R.id.messageText);
                             messageText.setText("Uploading file name : "+uploadFileName+"'");
                             /************* Php script path ****************/
-                            upLoadServerUri = "http://jhk.n-e.kr:8080/upload_img.php?book_id="+book_id;//서버컴퓨터의 ip주소
+                            upLoadServerUri = "http://jhk.n-e.kr:8080/upload_img.php?book_id="+title;//서버컴퓨터의 ip주소
                             uploadButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -281,8 +283,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                         }
                         if (which == 2) { //삭제
                             editbooklist task = new editbooklist();
-                            String book_name = "book5";
-                            task.execute("http://jhk.n-e.kr:8080/book_remove.php",book_name);
+                            task.execute("http://jhk.n-e.kr:8080/book_remove.php",title);
                             finish();//인텐트 종료
                             overridePendingTransition(0, 0);//인텐트 효과 없애기
                             Intent intent = getIntent(); //인텐트
@@ -293,11 +294,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
                     }
 
-
                 }).setNegativeButton("", null).show();
 
     }
-
     //리스트뷰 가져오기 시작
     private class GetData extends AsyncTask<String, Void, String> {
         ProgressDialog progressDialog;
@@ -439,9 +438,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
-            progressDialog.dismiss();
-            mTextViewResult.setText(result);
+            //progressDialog.dismiss();
             Log.d(TAG, "POST response  - " + result);
         }
 
