@@ -43,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -124,7 +125,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
         }
-
+        //리스트뷰 task
         mlistView = (ListView) findViewById(R.id.listView1);
         mArrayList = new ArrayList<>();
 
@@ -135,7 +136,14 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                String book_name = editText1.getText().toString();
+                editbooklist task = new editbooklist();
+                task.execute("http://jhk.n-e.kr:8080/book_add.php",book_name);
+                finish();//인텐트 종료
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
+                Intent intent = getIntent(); //인텐트
+                startActivity(intent); //액티비티 열기
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
             }
         });
 
@@ -272,7 +280,14 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                             //OCR END
                         }
                         if (which == 2) { //삭제
-                            System.out.println("++++" + which);
+                            editbooklist task = new editbooklist();
+                            String book_name = "book5";
+                            task.execute("http://jhk.n-e.kr:8080/book_remove.php",book_name);
+                            finish();//인텐트 종료
+                            overridePendingTransition(0, 0);//인텐트 효과 없애기
+                            Intent intent = getIntent(); //인텐트
+                            startActivity(intent); //액티비티 열기
+                            overridePendingTransition(0, 0);//인텐트 효과 없애기
                         }
                         Toast.makeText(getApplicationContext(), ":" + which + "." + classData[which], Toast.LENGTH_SHORT).show();
 
@@ -410,6 +425,77 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
     }
     //리스트뷰 가져오기 끝
+
+    //책 추가 task 시작
+    class editbooklist extends AsyncTask<String, Void, String>{
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            progressDialog = ProgressDialog.show(MainActivity.this,
+                    "Please Wait", null, true, true);
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            progressDialog.dismiss();
+            mTextViewResult.setText(result);
+            Log.d(TAG, "POST response  - " + result);
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            String book_name = (String)params[1];
+            String serverURL = (String)params[0];
+            String postParameters = "book_name=" + book_name;
+            try {
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.connect();
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                }
+                else{
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while((line = bufferedReader.readLine()) != null){
+                    sb.append(line);
+                }
+
+                bufferedReader.close();
+
+                return sb.toString();
+
+            } catch (Exception e) {
+                Log.d(TAG, "InsertData: Error ", e);
+                return new String("Error: " + e.getMessage());
+            }
+
+        }
+    }
+    //책 추가 task 끝
 //OCR 카메라 이후 upload
     public int uploadFile(String sourceFileUri) {
 
