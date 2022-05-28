@@ -24,6 +24,13 @@
         android:layout_weight="4"
         android:layout_margin="5dp"
         android:padding="5dp" />
+    <TextView
+        android:id="@+id/textView_list_page"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="4"
+        android:layout_margin="5dp"
+        android:padding="5dp" />
 
 
 </LinearLayout>
