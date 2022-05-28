@@ -72,6 +72,7 @@ import org.json.JSONObject;
 public class MainActivity extends Activity implements AdapterView.OnItemClickListener {
 
 
+
     final private static String TAG = "tag";
 
     private static final int REQUEST_IMAGE_CAPTURE = 672;
@@ -95,7 +96,6 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     //listview 용
     private static final String TAG_JSON = "result";
     private static final String TAG_ID = "book_id";
-    private static final String TAG_NAME = "book_name";
     private static final String TAG_PAGE = "book_page";
 
     private TextView mTextViewResult;
@@ -398,13 +398,11 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 JSONObject item = jsonArray.getJSONObject(i);
 
                 String id = item.getString(TAG_ID);
-                String name = item.getString(TAG_NAME);
                 String page = item.getString(TAG_PAGE);
 
                 HashMap<String, String> hashMap = new HashMap<>();
 
                 hashMap.put(TAG_ID, id);
-                hashMap.put(TAG_NAME, name);
                 hashMap.put(TAG_PAGE, page);
 
                 mArrayList.add(hashMap);
@@ -412,8 +410,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
             ListAdapter adapter = new SimpleAdapter(
                     MainActivity.this, mArrayList, R.layout.item_list,
-                    new String[]{TAG_ID, TAG_NAME, TAG_PAGE},
-                    new int[]{R.id.textView_list_id, R.id.textView_list_name, R.id.textView_list_page}
+                    new String[]{TAG_ID, TAG_PAGE},
+                    new int[]{R.id.textView_list_id, R.id.textView_list_page}
             );
 
             mlistView.setAdapter(adapter);
