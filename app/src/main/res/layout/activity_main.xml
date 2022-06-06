@@ -9,21 +9,24 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:weightSum="5">
 
         <EditText
             android:id="@+id/editText1"
+            android:layout_weight="4"
             android:layout_width="345dp"
             android:layout_height="wrap_content"
             android:ems="13"
-            android:hint="추가할 문자열 입력하세요" />
+            android:hint="제목을 입력하세요" />
 
         <Button
             android:id="@+id/button1"
+            android:layout_weight="1"
+            android:theme="@style/ButtonStyle"
             android:layout_width="63dp"
-            android:layout_height="35dp"
-            android:background="@drawable/buttonshape"
-            android:text="+" />
+            android:layout_height="45dp"
+            android:text="추가" />
 
     </LinearLayout>
 
