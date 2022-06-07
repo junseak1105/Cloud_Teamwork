@@ -25,7 +25,6 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.classprj.myapplication.read.PlayState;
 import com.classprj.myapplication.read.TextPlayer;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,7 +67,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
         Intent intent = getIntent();
         book_id = intent.getExtras().getString("book_id");
-        url = url + "book_id=" + "test";
+        url = url + "book_id=" + book_id;
 
 
         initView();
@@ -184,10 +183,12 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
                 break;
 
             case R.id.btn_next:
+                stopPlay();
                 nextpage();
                 break;
 
             case R.id.btn_back:
+                url = "http://jhk.n-e.kr:8080/book_content.php?";
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
         }
@@ -237,6 +238,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
                 public void onClick(DialogInterface dialog, int which) {
                     // OK 버튼을 눌렸을 경우
                     nowpage = 0;
+                    url = "http://jhk.n-e.kr:8080/book_content.php?";
                     Intent intent = new Intent(TTSActivity.this, MainActivity.class);
                     startActivity(intent);
                     Toast.makeText(getApplicationContext(), "Pressed OK",
