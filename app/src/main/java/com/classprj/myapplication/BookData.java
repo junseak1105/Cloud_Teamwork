@@ -2,7 +2,7 @@ package com.classprj.myapplication;
 
 public class BookData {
     String BOOK_ID;
-    String BOOK_PAGE;
+    int BOOK_PAGE;
     String BOOK_CONTENT;
     String CONTENT_LENGTH;
     String BOOK_PAGE_IDX;
@@ -15,11 +15,11 @@ public class BookData {
         this.BOOK_ID = BOOK_ID;
     }
 
-    public String getBOOK_PAGE() {
+    public int getBOOK_PAGE() {
         return BOOK_PAGE;
     }
 
-    public void setBOOK_PAGE(String BOOK_PAGE) {
+    public void setBOOK_PAGE(int BOOK_PAGE) {
         this.BOOK_PAGE = BOOK_PAGE;
     }
 
@@ -47,7 +47,7 @@ public class BookData {
         this.BOOK_PAGE_IDX = BOOK_PAGE_IDX;
     }
 
-    public BookData(String BOOK_ID, String BOOK_PAGE, String BOOK_CONTENT, String CONTENT_LENGTH, String BOOK_PAGE_IDX) {
+    public BookData(String BOOK_ID, int BOOK_PAGE, String BOOK_CONTENT, String CONTENT_LENGTH, String BOOK_PAGE_IDX) {
         this.BOOK_ID = BOOK_ID;
         this.BOOK_PAGE = BOOK_PAGE;
         this.BOOK_CONTENT = BOOK_CONTENT;

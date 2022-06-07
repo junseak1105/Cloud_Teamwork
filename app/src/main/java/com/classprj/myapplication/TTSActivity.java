@@ -25,6 +25,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.classprj.myapplication.read.PlayState;
 import com.classprj.myapplication.read.TextPlayer;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,13 +53,13 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     //book이 맞나?
     ArrayList<BookData> booklist = new ArrayList<>();
+    ArrayList book_list = new ArrayList();
     private TextToSpeech tts;
 
     Button playBtn, pauseBtn, stopBtn, gonext, goback;
     TextView contentTextView, pagecheck;
 
-    //테스트용
-
+    String onepagetext = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
         Intent intent = getIntent();
         book_id = intent.getExtras().getString("book_id");
-        url = url+"book_id="+book_id;
+        url = url + "book_id=" + "test";
 
 
         initView();
@@ -79,12 +80,12 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsonObject = response.getJSONObject(i);
                         String Book_ID = jsonObject.getString("book_id");
-                        String Book_Page = jsonObject.getString("book_page");
+                        int Book_Page = jsonObject.getInt("book_page");
                         String Book_Content = jsonObject.getString("book_content");
                         String Content_Length = jsonObject.getString("content_length");
                         String Book_Page_Idx = jsonObject.getString("book_page_idx");
 
-                        booklist.add(new BookData(Book_ID ,Book_Page, Book_Content, Content_Length, Book_Page_Idx));
+                        booklist.add(new BookData(Book_ID, Book_Page, Book_Content, Content_Length, Book_Page_Idx));
 
                     }
                     initTTS();
@@ -92,13 +93,12 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
                     e.printStackTrace();
                 }
             }
-        },new Response.ErrorListener(){
+        }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error){
+            public void onErrorResponse(VolleyError error) {
             }
         });
         queue.add(req);
-
 
 
     }
@@ -122,8 +122,8 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
 
     //TTS 기능
     private void initTTS() {
-        contentTextView.setText(booklist.get(nowpage).getBOOK_CONTENT());
-        pagecheck.setText((nowpage +1 ) + "/" + booklist.size());
+        pageset(nowpage);
+        pagecheck.setText((nowpage + 1) + "/" + booklist.get(booklist.size() - 1).getBOOK_PAGE());
         params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, null);
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
@@ -157,6 +157,15 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
                 lastPlayIndex = start;
             }
         });
+    }
+
+    private void pageset(int nowpage) {
+        for (int i = nowpage; i < booklist.size(); i++) {
+            if (booklist.get(i).getBOOK_PAGE() == nowpage + 1) {
+                onepagetext += booklist.get(i).getBOOK_CONTENT();
+            }
+        }
+        contentTextView.setText(onepagetext);
     }
 
     @Override
@@ -214,10 +223,11 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     }
 
     public void nextpage() {
-        if (nowpage < booklist.size()-1) {
-            contentTextView.setText(booklist.get(nowpage+1).getBOOK_CONTENT());
-            nowpage++;
-            pagecheck.setText((nowpage+1) + "/" + booklist.size());
+        nowpage++;
+        if (nowpage < booklist.get(booklist.size() - 1).getBOOK_PAGE()) {
+            onepagetext = "";
+            pageset(nowpage);
+            pagecheck.setText((nowpage + 1) + "/" + booklist.get(booklist.size() - 1).getBOOK_PAGE());
         } else {
             AlertDialog.Builder malert = new AlertDialog.Builder(TTSActivity.this);
             malert.setTitle("");
@@ -226,6 +236,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
             malert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     // OK 버튼을 눌렸을 경우
+                    nowpage = 0;
                     Intent intent = new Intent(TTSActivity.this, MainActivity.class);
                     startActivity(intent);
                     Toast.makeText(getApplicationContext(), "Pressed OK",
@@ -246,7 +257,6 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
     }
 
     //글자 색
-
     private void changeHighlight(final int start, final int end) {
         runOnUiThread(new Runnable() {
             @Override
@@ -255,6 +265,7 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
             }
         });
     }
+
     private void setContentFromEditText(String content) {
         contentTextView.setText(content, TextView.BufferType.SPANNABLE);
         spannable = (SpannableString) contentTextView.getText();
@@ -303,5 +314,4 @@ public class TTSActivity extends AppCompatActivity implements TextPlayer, View.O
         tts.shutdown();
         super.onDestroy();
     }
-
 }
