@@ -12,11 +12,11 @@ $conn=mysqli_connect($host,$user,$pass,$dbname,$dbport);
 //한글 입력 하게
 mysqli_set_charset($conn,"utf8");
 
- if($conn){
-        echo "db성공";
-}else{
-       echo "db실패";
-}
+//  if($conn){
+//         echo "db성공";
+// }else{
+//        echo "db실패";
+// }
 ?>
 <?php
 $conn = mysqli_connect(
